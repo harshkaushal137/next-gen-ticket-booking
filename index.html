@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prep MyShow — Next-Gen Cinema Booking</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet" />
+  <!-- QR Code library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- html2pdf -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- SCREEN 1: WELCOME / SPLASH                             -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div id="screen-welcome" class="screen active">
+    <div class="welcome-bg">
+      <div class="film-strips"></div>
+      <div class="spotlight spotlight-1"></div>
+      <div class="spotlight spotlight-2"></div>
+      <div class="particles" id="particles"></div>
+    </div>
+    <div class="welcome-content">
+      <div class="logo-icon">🎬</div>
+      <h1 class="welcome-title" id="welcomeTitle"></h1>
+      <p class="welcome-tagline" id="welcomeTagline"></p>
+      <div class="loading-bar-container">
+        <div class="loading-bar-track">
+          <div class="loading-bar-fill" id="loadingBar"></div>
+          <span class="loading-percent" id="loadingPercent">0%</span>
+        </div>
+        <div class="loading-label">Preparing your experience...</div>
+      </div>
+      <button class="btn-gold" id="welcomeNextBtn" style="display:none" onclick="showScreen('screen-auth')">
+        <span>Enter the Experience</span>
+        <span class="btn-arrow">→</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- SCREEN 2: AUTH                                         -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div id="screen-auth" class="screen">
+    <div class="auth-bg">
+      <div class="auth-glow"></div>
+    </div>
+    <div class="auth-container">
+      <div class="auth-card">
+        <div class="auth-logo">🎬 <span>Prep MyShow</span></div>
+        <h2 class="auth-title">Create Your Account</h2>
+        <p class="auth-sub">Join the elite cinema experience</p>
+
+        <!-- SIGNUP FORM -->
+        <div id="signupForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label>First Name *</label>
+              <input type="text" id="firstName" placeholder="John" />
+            </div>
+            <div class="form-group">
+              <label>Middle Name <span class="optional">(Optional)</span></label>
+              <input type="text" id="middleName" placeholder="M." />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Last Name *</label>
+              <input type="text" id="lastName" placeholder="Doe" />
+            </div>
+            <div class="form-group">
+              <label>Contact *</label>
+              <input type="tel" id="contact" placeholder="+91 9876543210" />
+            </div>
+          </div>
+          <div class="form-group full">
+            <label>Email Address *</label>
+            <input type="email" id="email" placeholder="john@example.com" />
+          </div>
+
+          <!-- Bot Detection -->
+          <div class="bot-check-container">
+            <div class="bot-check-box" id="botCheckBox" onclick="triggerBotCheck()">
+              <div class="bot-spinner" id="botSpinner" style="display:none"></div>
+              <div class="bot-tick" id="botTick" style="display:none">✓</div>
+              <div class="bot-idle" id="botIdle">☐</div>
+            </div>
+            <span id="botLabel">I am not a robot</span>
+            <div class="recaptcha-logo">🔒</div>
+          </div>
+
+          <button class="btn-gold full" id="sendOtpBtn" onclick="sendOTP()" disabled>
+            Send OTP
+          </button>
+        </div>
+
+        <!-- OTP FORM -->
+        <div id="otpForm" style="display:none">
+          <p class="otp-info">Enter the 6-digit OTP sent to your email.<br><span id="otpTimer" class="otp-timer">Valid for: 2:00</span></p>
+          <div class="otp-inputs">
+            <input class="otp-digit" maxlength="1" type="text" />
+            <input class="otp-digit" maxlength="1" type="text" />
+            <input class="otp-digit" maxlength="1" type="text" />
+            <input class="otp-digit" maxlength="1" type="text" />
+            <input class="otp-digit" maxlength="1" type="text" />
+            <input class="otp-digit" maxlength="1" type="text" />
+          </div>
+          <button class="btn-gold full" onclick="verifyOTP()">Verify & Enter</button>
+          <button class="btn-ghost full" onclick="resendOTP()">Resend OTP</button>
+        </div>
+
+        <!-- LOGIN LINK -->
+        <p class="auth-switch" id="loginLink">
+          Already a member? <span onclick="showLoginMode()">Sign In</span>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- SCREEN 3: DASHBOARD                                    -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div id="screen-dashboard" class="screen">
+
+    <!-- TOP NAVBAR -->
+    <nav class="top-nav">
+      <div class="nav-left">
+        <div class="spinning-logo">🎬</div>
+        <span class="brand-name">Prep MyShow</span>
+      </div>
+      <div class="nav-center">
+        <div class="search-bar">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchInput" placeholder="Search movies, events..." oninput="filterMovies()" />
+        </div>
+        <div class="city-selector">
+          <select id="citySelect" onchange="updateCity()">
+            <option value="">📍 Select City</option>
+            <option>Mumbai</option><option>Delhi</option><option>Bangalore</option>
+            <option>Chennai</option><option>Hyderabad</option><option>Kolkata</option>
+            <option>Pune</option><option>Ahmedabad</option><option>Jaipur</option>
+            <option>Surat</option><option>Lucknow</option><option>Kanpur</option>
+            <option>Nagpur</option><option>Indore</option><option>Thane</option>
+            <option>Bhopal</option><option>Visakhapatnam</option><option>Pimpri</option>
+            <option>Patna</option><option>Vadodara</option><option>Ghaziabad</option>
+            <option>Ludhiana</option><option>Agra</option><option>Nashik</option>
+            <option>Faridabad</option><option>Meerut</option><option>Rajkot</option>
+            <option>Varanasi</option><option>Amritsar</option><option>Allahabad</option>
+          </select>
+        </div>
+      </div>
+      <div class="nav-right">
+        <div class="profile-circle" id="profileCircle" onclick="toggleProfileMenu()">HK</div>
+        <div class="three-dots" onclick="toggleNotifMenu()">⋮</div>
+        <!-- Profile Menu -->
+        <div class="dropdown-menu" id="profileMenu" style="display:none">
+          <div class="dropdown-header" id="profileMenuName">John Doe</div>
+          <div class="dropdown-item" onclick="showScreen('screen-dashboard')">🏠 Dashboard</div>
+          <div class="dropdown-item" onclick="showBookings()">🎟️ My Bookings</div>
+          <div class="dropdown-item" onclick="showRewards()">⭐ Rewards</div>
+          <div class="dropdown-item danger" onclick="logout()">🚪 Logout</div>
+        </div>
+        <!-- Notifications Menu -->
+        <div class="dropdown-menu notif-menu" id="notifMenu" style="display:none">
+          <div class="dropdown-header">Notifications</div>
+          <div class="dropdown-item">🔔 Avengers: Endgame is now showing!</div>
+          <div class="dropdown-item">💳 Axis Bank 5% cashback applied</div>
+          <div class="dropdown-item">🎁 You have 500 reward points</div>
+          <div class="dropdown-header" style="margin-top:8px">Quick Links</div>
+          <div class="dropdown-item" onclick="showBookings()">📋 Bookings</div>
+          <div class="dropdown-item">❓ Help & Support</div>
+          <div class="dropdown-item">🏆 Rewards</div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- SUB NAVBAR -->
+    <nav class="sub-nav">
+      <div class="sub-nav-items">
+        <div class="sub-nav-item active" onclick="setSubNav(this,'movies')">🎬 Movies</div>
+        <div class="sub-nav-item" onclick="setSubNav(this,'stream')">📺 Stream</div>
+        <div class="sub-nav-item" onclick="setSubNav(this,'events')">🎪 Events</div>
+        <div class="sub-nav-item" onclick="setSubNav(this,'plays')">🎭 Plays</div>
+        <div class="sub-nav-item" onclick="setSubNav(this,'sports')">⚽ Sports</div>
+        <div class="sub-nav-item" onclick="setSubNav(this,'activities')">🎯 Activities</div>
+        <div class="sub-nav-item ipl" onclick="setSubNav(this,'ipl')">🏏 TATA IPL 2026</div>
+      </div>
+    </nav>
+
+    <!-- DASHBOARD BODY -->
+    <div class="dashboard-body" id="dashboardBody">
+
+      <!-- SLIDESHOW -->
+      <div class="slideshow-container">
+        <div class="slideshow" id="slideshow">
+          <!-- Slide 1: App Download -->
+          <div class="slide slide-app active">
+            <div class="slide-content-inner">
+              <div class="slide-text">
+                <h2>📱 Download the Prep MyShow App</h2>
+                <p>Book tickets on the go. Exclusive app-only offers await you!</p>
+                <div class="app-badges">
+                  <span class="app-badge">🍎 App Store</span>
+                  <span class="app-badge">🤖 Play Store</span>
+                </div>
+              </div>
+              <div class="slide-phone">📱</div>
+            </div>
+          </div>
+          <!-- Slide 2: Axis Bank -->
+          <div class="slide slide-bank">
+            <div class="slide-content-inner">
+              <div class="slide-text">
+                <div class="bank-logo">🏦 AXIS BANK</div>
+                <h2>Get 5% Cashback</h2>
+                <p>Use your Axis Bank Credit/Debit Card and save up to ₹500 per booking!</p>
+                <span class="offer-tag">Limited Time Offer</span>
+              </div>
+              <div class="cashback-circle">5%<br><small>BACK</small></div>
+            </div>
+          </div>
+          <!-- Slide 3: Live Users Graph -->
+          <div class="slide slide-graph">
+            <div class="slide-content-inner">
+              <div class="slide-text">
+                <h2>🔴 LIVE NOW</h2>
+                <p>Join <span id="liveUserCount" class="live-count">2,347</span> users booking right now!</p>
+                <div class="live-indicator"><span class="live-dot"></span> Live Activity</div>
+              </div>
+              <div class="live-graph" id="liveGraph">
+                <canvas id="graphCanvas" width="300" height="120"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-dots">
+          <span class="slide-dot active" onclick="goToSlide(0)"></span>
+          <span class="slide-dot" onclick="goToSlide(1)"></span>
+          <span class="slide-dot" onclick="goToSlide(2)"></span>
+        </div>
+      </div>
+
+      <!-- CONTENT SECTIONS -->
+      <div id="contentMovies" class="content-section">
+        <div class="section-header">
+          <h3 class="section-title">Now Showing</h3>
+          <span class="section-link">See All →</span>
+        </div>
+        <div class="movies-grid" id="moviesGrid"></div>
+      </div>
+
+      <div id="contentStream" class="content-section" style="display:none">
+        <div class="section-header">
+          <h3 class="section-title">Stream at Home</h3>
+        </div>
+        <div class="movies-grid" id="streamGrid"></div>
+      </div>
+
+      <div id="contentEvents" class="content-section" style="display:none">
+        <div class="coming-soon-box">
+          <div class="cs-icon">🎪</div>
+          <h3>Events Coming Soon</h3>
+          <p>Grand music festivals and live events are being curated for you.</p>
+        </div>
+      </div>
+
+      <div id="contentPlays" class="content-section" style="display:none">
+        <div class="coming-soon-box">
+          <div class="cs-icon">🎭</div>
+          <h3>Plays & Theatre</h3>
+          <p>Broadway-quality plays in your city — coming soon.</p>
+        </div>
+      </div>
+
+      <div id="contentSports" class="content-section" style="display:none">
+        <div class="coming-soon-box">
+          <div class="cs-icon">⚽</div>
+          <h3>Sports Events</h3>
+          <p>Football, Basketball, Tennis — all your favorites, one place.</p>
+        </div>
+      </div>
+
+      <div id="contentActivities" class="content-section" style="display:none">
+        <div class="coming-soon-box">
+          <div class="cs-icon">🎯</div>
+          <h3>Activities & Experiences</h3>
+          <p>Cooking classes, adventure sports, and more.</p>
+        </div>
+      </div>
+
+      <div id="contentIpl" class="content-section" style="display:none">
+        <div class="ipl-hero">
+          <div class="ipl-glow"></div>
+          <div class="ipl-content">
+            <img src="https://upload.wikimedia.org/wikipedia/en/thumb/8/8d/IPL_logo_2022.png/220px-IPL_logo_2022.png" alt="IPL" class="ipl-logo-img" onerror="this.style.display='none'" />
+            <h2>🏏 TATA IPL 2026</h2>
+            <p>Watch live IPL matches at your nearest stadium!</p>
+            <div class="ipl-matches" id="iplMatches"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- SCREEN 4: MOVIE DETAIL / TIMINGS                       -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div id="screen-timings" class="screen">
+    <div class="screen-header">
+      <button class="back-btn" onclick="showScreen('screen-dashboard')">← Back</button>
+      <div id="timingMovieTitle" class="screen-title"></div>
+    </div>
+    <div class="timings-body">
+      <div class="movie-detail-hero" id="movieDetailHero">
+        <img id="timingMovieImg" src="" alt="" class="detail-poster" />
+        <div class="detail-info">
+          <h2 id="detailTitle"></h2>
+          <div class="detail-meta">
+            <span class="badge badge-gold">⭐ 8.5</span>
+            <span class="badge">UA • 2h 45m</span>
+            <span class="badge">Action / Thriller</span>
+          </div>
+          <p class="detail-desc">An epic cinematic experience that pushes the boundaries of storytelling and visual effects. Featuring world-class performances and a gripping narrative.</p>
+        </div>
+      </div>
+      <div class="date-selector" id="dateSelector"></div>
+      <div class="theater-list" id="theaterList"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- SCREEN 5: SEAT SELECTION                               -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div id="screen-seats" class="screen">
+    <div class="screen-header">
+      <button class="back-btn" onclick="showScreen('screen-timings')">← Back</button>
+      <div class="screen-title" id="seatScreenTitle">Select Your Seats</div>
+      <div class="seat-header-info">
+        <span id="seatSelectedCount">0 Selected</span>
+        <span id="seatTotal" class="seat-total-badge">₹0</span>
+      </div>
+    </div>
+
+    <!-- Film Reel Animation -->
+    <div class="film-reel-container" id="filmReelAnim">
+      <div class="film-reel">🎞️</div>
+      <div class="film-beam"></div>
+    </div>
+
+    <!-- Cinema Screen -->
+    <div class="cinema-screen-wrapper">
+      <div class="cinema-screen-label">SCREEN</div>
+      <div class="cinema-screen-glow"></div>
+    </div>
+
+    <!-- Seat Map -->
+    <div class="seat-hall" id="seatHall"></div>
+
+    <!-- Legend -->
+    <div class="seat-legend">
+      <span class="legend-item"><span class="leg-box available"></span>Available</span>
+      <span class="legend-item"><span class="leg-box selected"></span>Selected</span>
+      <span class="legend-item"><span class="leg-box booked"></span>Booked</span>
+      <span class="legend-item"><span class="leg-box diamond"></span>Diamond</span>
+      <span class="legend-item"><span class="leg-box platinum"></span>Platinum</span>
+      <span class="legend-item"><span class="leg-box gold-seat"></span>Gold</span>
+    </div>
+
+    <!-- Proceed Bar -->
+    <div class="seat-proceed-bar" id="seatProceedBar" style="display:none">
+      <div>
+        <div class="proceed-seats" id="proceedSeats"></div>
+        <div class="proceed-total" id="proceedTotal"></div>
+      </div>
+      <button class="btn-gold" onclick="goToSnacks()">Add Snacks →</button>
+    </div>
+
+    <!-- Seat Info Popup (3D Panel) -->
+    <div class="seat-popup" id="seatPopup" style="display:none">
+      <div class="popup-header">
+        <span id="popupSeatId">Seat A1</span>
+        <button class="popup-close" onclick="closeSeatPopup()">✕</button>
+      </div>
+      <div class="popup-body">
+        <div class="popup-stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">📐</div>
+            <div class="stat-label">Recline Angle</div>
+            <div class="stat-value" id="pRecline">0°</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🌡️</div>
+            <div class="stat-label">Temperature</div>
+            <div class="stat-value" id="pTemp">22°C</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🦴</div>
+            <div class="stat-label">Back Pain Risk</div>
+            <div class="stat-value" id="pBackPain">12%</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">👁️</div>
+            <div class="stat-label">Neck Angle</div>
+            <div class="stat-value" id="pNeckAngle">15°</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🔊</div>
+            <div class="stat-label">Left Speaker</div>
+            <div class="stat-value" id="pLSpeaker">50%</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🔊</div>
+            <div class="stat-label">Right Speaker</div>
+            <div class="stat-value" id="pRSpeaker">50%</div>
+          </div>
+        </div>
+        <div class="fabric-selector">
+          <div class="fabric-label">Seat Fabric:</div>
+          <div class="fabric-options">
+            <div class="fabric-opt selected" data-fabric="leather" onclick="selectFabric(this,'leather')">
+              <div class="fabric-preview leather-prev"></div>
+              <span>Leather</span>
+            </div>
+            <div class="fabric-opt" data-fabric="velvet" onclick="selectFabric(this,'velvet')">
+              <div class="fabric-preview velvet-prev"></div>
+              <span>Velvet</span>
+            </div>
+          </div>
+        </div>
+        <button class="btn-gold full" onclick="selectSeatFromPopup()">Select This Seat</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- SCREEN 6: SNACKS                                       -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div id="screen-snacks" class="screen">
+    <div class="screen-header">
+      <button class="back-btn" onclick="showScreen('screen-seats')">← Back</button>
+      <div class="screen-title">Snacks & Beverages</div>
+      <div class="snack-cart-badge" id="snackCartBadge">₹0</div>
+    </div>
+    <div class="snacks-body">
+      <div class="snacks-grid" id="snacksGrid"></div>
+    </div>
+    <div class="snacks-footer">
+      <div class="snack-summary" id="snackSummary">No items added</div>
+      <button class="btn-gold" onclick="goToPayment()">Proceed to Payment →</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- SCREEN 7: PAYMENT                                      -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div id="screen-payment" class="screen">
+    <div class="screen-header">
+      <button class="back-btn" onclick="showScreen('screen-snacks')">← Back</button>
+      <div class="screen-title">Secure Payment</div>
+    </div>
+    <div class="payment-body">
+      <div class="payment-summary-card">
+        <h3>Order Summary</h3>
+        <div class="order-lines" id="orderLines"></div>
+        <div class="order-divider"></div>
+        <div class="order-total" id="orderTotal">Total: ₹0</div>
+      </div>
+
+      <div class="payment-methods">
+        <h3>Payment Method</h3>
+        <div class="method-tabs">
+          <div class="method-tab active" onclick="selectPayment(this,'upi')">UPI</div>
+          <div class="method-tab" onclick="selectPayment(this,'paylater')">Pay Later</div>
+          <div class="method-tab" onclick="selectPayment(this,'card')">Cards</div>
+          <div class="method-tab" onclick="selectPayment(this,'cash')">Cash</div>
+        </div>
+
+        <!-- UPI Panel -->
+        <div class="payment-panel" id="panel-upi">
+          <div class="upi-options">
+            <div class="upi-app" onclick="selectUPI(this,'@paytm')"><span>💰</span> @paytm</div>
+            <div class="upi-app" onclick="selectUPI(this,'@phonepe')"><span>💜</span> @phonepe</div>
+            <div class="upi-app" onclick="selectUPI(this,'@googlepay')"><span>🔵</span> @googlepay</div>
+            <div class="upi-app" onclick="selectUPI(this,'@ybl')"><span>🟡</span> @ybl</div>
+            <div class="upi-app" onclick="selectUPI(this,'@upi')"><span>🏦</span> Other UPI</div>
+          </div>
+          <div class="upi-input-row">
+            <input type="text" id="upiId" placeholder="Enter UPI ID" class="upi-input" />
+            <button class="btn-gold" onclick="verifyUPI()">Verify</button>
+          </div>
+          <div id="upiVerifyStatus"></div>
+
+          <!-- QR Section -->
+          <div class="qr-section">
+            <div class="qr-title">Or Scan QR Code</div>
+            <div class="qr-wrapper">
+              <div id="qrCode"></div>
+            </div>
+            <div class="qr-sub">Scan with Google Pay, PhonePe, Paytm or any UPI app</div>
+            <div class="qr-timer" id="qrTimer">QR valid for: 1:00</div>
+            <div class="dual-device-info">
+              <span class="info-icon">📱</span>
+              <span>After scanning, complete payment on your phone. This page will update automatically.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pay Later Panel -->
+        <div class="payment-panel" id="panel-paylater" style="display:none">
+          <div class="paylater-info">
+            <div class="paylater-icon">🕐</div>
+            <h4>Pay Later</h4>
+            <p>Pay within 7 days. <strong>10% convenience tax</strong> will be added.</p>
+            <div class="tax-breakdown" id="taxBreakdown"></div>
+          </div>
+        </div>
+
+        <!-- Card Panel -->
+        <div class="payment-panel" id="panel-card" style="display:none">
+          <div class="card-form">
+            <input type="text" placeholder="Card Number" class="card-input" maxlength="19" oninput="formatCard(this)" />
+            <div class="card-row">
+              <input type="text" placeholder="MM/YY" class="card-input half" maxlength="5" />
+              <input type="text" placeholder="CVV" class="card-input half" maxlength="3" type="password" />
+            </div>
+            <input type="text" placeholder="Cardholder Name" class="card-input" />
+          </div>
+        </div>
+
+        <!-- Cash Panel -->
+        <div class="payment-panel" id="panel-cash" style="display:none">
+          <div class="cash-info">
+            <div class="cash-icon">💵</div>
+            <h4>Pay at Counter</h4>
+            <p>Show your booking reference at the cinema counter.</p>
+            <p class="cash-note">Please arrive 30 minutes before showtime.</p>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-gold pay-btn" onclick="initiatePayment()">
+        <span>🔒 Pay Now</span>
+        <span id="payNowAmount">₹0</span>
+      </button>
+    </div>
+
+    <!-- Payment Processing Overlay -->
+    <div class="payment-overlay" id="paymentOverlay" style="display:none">
+      <div class="payment-processing">
+        <div class="pay-spinner"></div>
+        <h3 id="payStatusText">Processing Payment...</h3>
+        <p id="payStatusSub">Please do not close this window</p>
+      </div>
+    </div>
+
+    <!-- UPI OTP Modal -->
+    <div class="modal-overlay" id="upiOtpModal" style="display:none">
+      <div class="modal-card">
+        <h3>UPI Authorization</h3>
+        <p>Enter the 6-digit PIN sent to your UPI-registered mobile</p>
+        <div class="otp-inputs">
+          <input class="otp-digit" maxlength="1" type="password" />
+          <input class="otp-digit" maxlength="1" type="password" />
+          <input class="otp-digit" maxlength="1" type="password" />
+          <input class="otp-digit" maxlength="1" type="password" />
+          <input class="otp-digit" maxlength="1" type="password" />
+          <input class="otp-digit" maxlength="1" type="password" />
+        </div>
+        <div class="upi-otp-timer" id="upiOtpTimer">Valid for: 1:00</div>
+        <button class="btn-gold full" onclick="confirmUPIOTP()">Authorize Payment</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- SCREEN 8: TICKET + FEEDBACK                            -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div id="screen-ticket" class="screen">
+    <div class="screen-header">
+      <div class="screen-title">🎉 Booking Confirmed!</div>
+    </div>
+
+    <!-- Success Animation -->
+    <div class="success-anim" id="successAnim">
+      <div class="success-ring"></div>
+      <div class="success-check">✓</div>
+      <div class="success-burst" id="successBurst"></div>
+    </div>
+
+    <div class="ticket-feedback-body">
+      <!-- TICKET -->
+      <div class="ticket-container" id="ticketContainer">
+        <div class="ticket" id="generatedTicket">
+          <div class="ticket-top">
+            <div class="ticket-brand">🎬 Prep MyShow</div>
+            <div class="ticket-ref" id="ticketRef">#PMS-000000</div>
+          </div>
+          <div class="ticket-movie" id="ticketMovie">Movie Name</div>
+          <div class="ticket-details-grid">
+            <div class="ticket-detail">
+              <span class="tdet-label">Date</span>
+              <span class="tdet-val" id="ticketDate">—</span>
+            </div>
+            <div class="ticket-detail">
+              <span class="tdet-label">Show Time</span>
+              <span class="tdet-val" id="ticketTime">—</span>
+            </div>
+            <div class="ticket-detail">
+              <span class="tdet-label">Seats</span>
+              <span class="tdet-val" id="ticketSeats">—</span>
+            </div>
+            <div class="ticket-detail">
+              <span class="tdet-label">Theater</span>
+              <span class="tdet-val" id="ticketTheater">—</span>
+            </div>
+            <div class="ticket-detail">
+              <span class="tdet-label">Amount</span>
+              <span class="tdet-val" id="ticketAmount">—</span>
+            </div>
+            <div class="ticket-detail">
+              <span class="tdet-label">Snacks</span>
+              <span class="tdet-val" id="ticketSnacks">—</span>
+            </div>
+          </div>
+          <div class="ticket-qr-row">
+            <div id="ticketQR"></div>
+            <div class="ticket-barcode">
+              <div class="barcode-bars" id="barcodeBars"></div>
+            </div>
+          </div>
+          <div class="ticket-footer">Valid for single entry only • Non-refundable</div>
+          <div class="ticket-tear"></div>
+        </div>
+        <button class="btn-gold full" onclick="downloadTicket()">📄 Download PDF Ticket</button>
+      </div>
+
+      <!-- FEEDBACK -->
+      <div class="feedback-container">
+        <h3 class="feedback-title">How was your booking experience?</h3>
+        <div class="star-rating" id="starRating">
+          <span class="star" data-val="1" onclick="rateStar(1)">★</span>
+          <span class="star" data-val="2" onclick="rateStar(2)">★</span>
+          <span class="star" data-val="3" onclick="rateStar(3)">★</span>
+          <span class="star" data-val="4" onclick="rateStar(4)">★</span>
+          <span class="star" data-val="5" onclick="rateStar(5)">★</span>
+        </div>
+        <textarea id="feedbackText" class="feedback-textarea" placeholder="Tell us about your experience..."></textarea>
+        <div class="feedback-filter-note" id="feedbackFilterNote"></div>
+        <button class="btn-gold full" onclick="submitFeedback()">Submit Feedback</button>
+      </div>
+    </div>
+
+    <!-- Thank You -->
+    <div class="thankyou-overlay" id="thankYouOverlay" style="display:none">
+      <div class="thankyou-content">
+        <div class="thankyou-emoji">🎬</div>
+        <h2>Thank You!</h2>
+        <p>Your feedback means the world to us.</p>
+        <p>Enjoy the show! 🍿</p>
+        <button class="btn-gold" onclick="showScreen('screen-dashboard')">🏠 Go to Dashboard</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
