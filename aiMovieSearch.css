@@ -1,0 +1,379 @@
+/* ================================================================
+   aiMovieSearch.css  — AI Movie Search Module Styles
+   PrepMyShow × Journey to Smile Cabs
+   ----------------------------------------------------------------
+   Add to index.html:  <link rel="stylesheet" href="aiMovieSearch.css"/>
+   (Can also paste at the bottom of your style.css)
+================================================================ */
+
+/* ── Section wrapper ─────────────────────────────────────────── */
+.ai-search-section {
+  border-top: 1px solid var(--clr-border, rgba(255,255,255,0.06));
+  padding-top: 32px;
+  padding-bottom: 8px;
+}
+
+/* ── Header ──────────────────────────────────────────────────── */
+.ai-search-header  { margin-bottom: 18px; }
+.ai-search-title   {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 22px;
+  font-weight: 900;
+  color: #fff;
+  flex-wrap: wrap;
+}
+.ai-spark          { font-size: 20px; }
+.ai-badge          {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  color: #e0e7ff;
+  letter-spacing: 0.05em;
+  vertical-align: middle;
+  text-transform: uppercase;
+}
+.ai-search-subtitle {
+  font-size: 13px;
+  color: #64748b;
+  margin-top: 4px;
+}
+.ai-search-subtitle em { color: #94a3b8; font-style: normal; }
+
+/* ── Search Bar ──────────────────────────────────────────────── */
+.ai-search-bar-wrap { margin-bottom: 14px; }
+.ai-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #111118;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 10px 14px;
+  transition: border-color 0.2s;
+}
+.ai-search-bar:focus-within {
+  border-color: #facc15;
+  box-shadow: 0 0 0 3px rgba(250,204,21,0.08);
+}
+.ai-search-icon  { font-size: 18px; flex-shrink: 0; color: #64748b; }
+.ai-search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #fff;
+  font-size: 14px;
+  font-family: 'Poppins', sans-serif;
+  min-width: 0;
+}
+.ai-search-input::placeholder { color: #475569; }
+.ai-search-input:disabled      { opacity: 0.5; cursor: not-allowed; }
+
+.ai-search-submit-btn {
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #facc15, #f59e0b);
+  color: #000;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 20px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: transform 0.15s, opacity 0.15s;
+}
+.ai-search-submit-btn:hover:not(:disabled) { transform: scale(1.04); }
+.ai-search-submit-btn:disabled             { opacity: 0.55; cursor: not-allowed; }
+.ai-btn-loader  { display: inline-block; }
+.hidden         { display: none !important; }
+
+/* ── Status bar ──────────────────────────────────────────────── */
+.ai-search-status {
+  font-size: 12px;
+  color: #94a3b8;
+  background: rgba(79,70,229,0.08);
+  border: 1px solid rgba(79,70,229,0.2);
+  border-radius: 8px;
+  padding: 8px 14px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.ai-status-icon  { font-size: 14px; }
+.ai-search-status strong { color: #e2e8f0; }
+.ai-status-confidence {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.ai-confidence-high   { background: rgba(34,197,94,0.15);  color: #4ade80; }
+.ai-confidence-medium { background: rgba(250,204,21,0.15); color: #facc15; }
+.ai-confidence-low    { background: rgba(239,68,68,0.15);  color: #f87171; }
+
+/* ── Results Grid ────────────────────────────────────────────── */
+.ai-results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+  margin-top: 8px;
+}
+@media (min-width: 640px)  { .ai-results-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); } }
+@media (min-width: 1024px) { .ai-results-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); } }
+
+/* ── Movie Card ──────────────────────────────────────────────── */
+.ai-movie-card {
+  background: #0d0d14;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: pointer;
+  will-change: transform;
+  transition: border-color 0.2s;
+}
+.ai-movie-card:hover { border-color: rgba(250,204,21,0.35); }
+
+.ai-card-poster-wrap {
+  position: relative;
+  aspect-ratio: 2/3;
+  overflow: hidden;
+  background: #111118;
+}
+.ai-card-poster {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+.ai-movie-card:hover .ai-card-poster { transform: scale(1.05); }
+
+.ai-card-poster-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.88) 0%, transparent 55%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: stretch;
+  gap: 6px;
+  padding: 10px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.ai-movie-card:hover .ai-card-poster-overlay { opacity: 1; }
+
+.ai-card-book-btn,
+.ai-card-detail-btn {
+  width: 100%;
+  padding: 7px;
+  border-radius: 8px;
+  border: none;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.ai-card-book-btn   { background: #facc15; color: #000; }
+.ai-card-detail-btn { background: rgba(255,255,255,0.12); color: #fff; }
+.ai-card-book-btn:hover,
+.ai-card-detail-btn:hover { transform: scale(1.03); }
+
+.ai-card-info { padding: 10px; }
+.ai-card-tags {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 5px;
+}
+.ai-card-year,
+.ai-card-lang {
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.ai-card-year { background: rgba(250,204,21,0.12); color: #facc15; }
+.ai-card-lang { background: rgba(99,102,241,0.15);  color: #a5b4fc; }
+
+.ai-card-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #f1f5f9;
+  line-height: 1.3;
+  margin-bottom: 4px;
+  display: -webkit-box;
+  display: box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  box-orient: vertical;
+  overflow: hidden;
+}
+.ai-card-rating {
+  font-size: 11px;
+  color: #facc15;
+  display: block;
+  margin-bottom: 5px;
+}
+.ai-card-overview {
+  font-size: 11px;
+  color: #64748b;
+  line-height: 1.5;
+  display: -webkit-box;
+  display: box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ── Empty / Error State ─────────────────────────────────────── */
+.ai-results-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #475569;
+  font-size: 14px;
+}
+.ai-results-empty[data-type="blocked"] { color: #f87171; }
+.ai-results-empty[data-type="error"]   { color: #fb923c; }
+.ai-empty-icon { font-size: 36px; margin-bottom: 10px; }
+
+/* ── Movie Detail Modal ──────────────────────────────────────── */
+.ai-detail-box {
+  max-width: 860px;
+  width: 94%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  background: #0d0d14;
+  border-radius: 20px;
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.ai-detail-backdrop {
+  width: 100%;
+  height: 200px;
+  background-size: cover;
+  background-position: center top;
+  flex-shrink: 0;
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%);
+}
+.modal-close-btn {
+  position: absolute;
+  top: 14px; right: 14px;
+  z-index: 10;
+  background: rgba(0,0,0,0.6);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #fff;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.modal-close-btn:hover { background: rgba(255,255,255,0.15); }
+
+.ai-detail-body {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 24px;
+  padding: 24px;
+  align-items: start;
+}
+@media (max-width: 580px) {
+  .ai-detail-body { grid-template-columns: 1fr; }
+  .ai-detail-left { display: flex; gap: 16px; align-items: flex-start; }
+  .ai-detail-left img { width: 120px; flex-shrink: 0; }
+}
+
+.ai-detail-poster {
+  width: 100%;
+  border-radius: 12px;
+  display: block;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+}
+.ai-detail-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 26px;
+  font-weight: 900;
+  color: #fff;
+  margin-bottom: 4px;
+}
+.ai-detail-tagline {
+  font-size: 13px;
+  color: #64748b;
+  font-style: italic;
+  margin-bottom: 12px;
+}
+.ai-detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 13px;
+  color: #94a3b8;
+  margin-bottom: 10px;
+}
+.ai-detail-meta span {
+  background: rgba(255,255,255,0.04);
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.ai-detail-genres {
+  font-size: 12px;
+  color: #818cf8;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+.ai-detail-overview {
+  font-size: 13px;
+  color: #cbd5e1;
+  line-height: 1.7;
+  margin-bottom: 14px;
+}
+.ai-detail-director {
+  font-size: 13px;
+  color: #94a3b8;
+  margin-bottom: 14px;
+}
+.ai-detail-director strong { color: #e2e8f0; }
+.ai-cast-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+.ai-cast-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 999px;
+  padding: 4px 10px 4px 4px;
+  font-size: 11px;
+  color: #94a3b8;
+}
+.ai-cast-chip img {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+}
