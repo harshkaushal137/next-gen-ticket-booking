@@ -22,69 +22,13 @@
 const AI_SEARCH_CONFIG = {
   // Use local backend during development, and relative path when served from the same host.
   API_BASE: (() => {
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:') {
-      return 'http://localhost:3001/api/movies';
-    }
-    return 'https://web-production-e76af.up.railway.app/api/movies';
-  })()
- * ================================================================
- *  aiMovieSearch.js  — Frontend AI Movie Search Module
- *  PrepMyShow × Journey to Smile Cabs
- * ----------------------------------------------------------------
- *  Drop this file next to script.js and add to index.html:
- *    <script src="aiMovieSearch.js"></script>
- *  (AFTER script.js and AFTER GSAP CDN)
- *
- *  This module:
- *    • Hooks into your existing APP state (reads APP.city)
- *    • Calls your backend /api/movies/search
- *    • Renders results with GSAP stagger entrance animations
- *    • Handles blocked queries, errors, loading states
- *    • Provides openAIMovieDetails() to fetch & show full detail
- * ================================================================
- */
-
-'use strict';
-
-/* ── Config ────────────────────────────────────────────────────────────────── */
-const AI_SEARCH_CONFIG = {
-  // Use local backend during development, and relative path when served from the same host.
-  API_BASE: (() => {
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:') {
-      return 'http://localhost:3001/api/movies';
-    }
-    return 'https://web-production-e76af.up.railway.app/api/movies';
-  })()
- * ================================================================
- *  aiMovieSearch.js  — Frontend AI Movie Search Module
- *  PrepMyShow × Journey to Smile Cabs
- * ----------------------------------------------------------------
- *  Drop this file next to script.js and add to index.html:
- *    <script src="aiMovieSearch.js"></script>
- *  (AFTER script.js and AFTER GSAP CDN)
- *
- *  This module:
- *    • Hooks into your existing APP state (reads APP.city)
- *    • Calls your backend /api/movies/search
- *    • Renders results with GSAP stagger entrance animations
- *    • Handles blocked queries, errors, loading states
- *    • Provides openAIMovieDetails() to fetch & show full detail
- * ================================================================
- */
-
-'use strict';
-
-/* ── Config ────────────────────────────────────────────────────────────────── */
-const AI_SEARCH_CONFIG = {
-  // Use local backend during development, and relative path when served from the same host.
-  API_BASE: (() => {
     if (window.location.protocol === 'file:') {
       return 'http://localhost:3001/api/movies';
     }
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
       return 'http://localhost:3001/api/movies';
     }
-    return '/api/movies';
+    return 'https://web-production-e76af.up.railway.app/api/movies';
   })(),
 
   STAGGER_DELAY  : 0.08,
