@@ -22,7 +22,7 @@
 /* ══════════════════════════════════════════════════════════════
    §1  GLOBAL APP STATE
 ══════════════════════════════════════════════════════════════ */
-const API_BASE = 'http://localhost:3001/api/movies';
+const API_BASE = 'https://web-production-e76af.up.railway.app/api/movies';
 
 const APP = {
   currentScreen   : 'screen-intro',
