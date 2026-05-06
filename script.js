@@ -1072,88 +1072,137 @@ function toggleSeat(el, id, type, price) {
 }
 
 function showSeatInfoPopup(id, type, price) {
-  // Remove existing popup
   document.getElementById('seat-info-popup')?.remove();
 
-  const features = {
-    platinum: {
-      color: '#818cf8',
-      icon: '👑',
-      title: 'Platinum Seat',
-      features: [
-        '🎯 Front-row premium experience',
-        '🦺 Recliner-style cushioning',
-        '📐 Wide legroom (extra 6")',
-        '❄️ Personal AC vent nearby',
-        '⚠️ Note: High neck tilt angle (~70°)',
-      ],
-      price: 500
-    },
-    gold: {
-      color: '#fbbf24',
-      icon: '⭐',
-      title: 'Gold Seat',
-      features: [
-        '✅ Best viewing angle (center)',
-        '🪑 Plush cushioned seat',
-        '👀 Perfect screen distance',
-        '🔊 Optimal surround sound zone',
-        '🎬 Most recommended section',
-      ],
-      price: 350
-    },
-    normal: {
-      color: '#94a3b8',
-      icon: '🎟️',
-      title: 'Normal Seat',
-      features: [
-        '📺 Good rear-view experience',
-        '💰 Most affordable option',
-        '🚶 Easy aisle access',
-        '🎬 Standard comfort seating',
-        '✔️ Value for money',
-      ],
-      price: 200
-    }
+  const cfg = {
+    platinum: { color:'#818cf8', title:'Platinum Seat', price:500,
+      features:['Front-row premium experience','Recliner-style cushioning','Wide legroom (extra 6")','Personal AC vent nearby','High neck tilt angle (~70deg)'],
+      seatColor:0x4f46e5, cushionColor:0x818cf8 },
+    gold:     { color:'#fbbf24', title:'Gold Seat', price:350,
+      features:['Best viewing angle (center)','Plush cushioned seat','Perfect screen distance','Optimal surround sound zone','Most recommended section'],
+      seatColor:0x92400e, cushionColor:0xfbbf24 },
+    normal:   { color:'#94a3b8', title:'Normal Seat', price:200,
+      features:['Good rear-view experience','Most affordable option','Easy aisle access','Standard comfort seating','Value for money'],
+      seatColor:0x334155, cushionColor:0x64748b },
   };
+  const f = cfg[type];
 
-  const f = features[type];
   const popup = document.createElement('div');
   popup.id = 'seat-info-popup';
-  popup.className = 'seat-info-popup';
+  popup.style.cssText = 'position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.78);backdrop-filter:blur(8px);';
+
   popup.innerHTML = `
-    <div class="seat-popup-content">
-      <button class="seat-popup-close" onclick="document.getElementById('seat-info-popup')?.remove()">✕</button>
-      <div class="seat-popup-header" style="border-color:${f.color}">
-        <span class="seat-popup-icon">${f.icon}</span>
-        <div>
-          <h3 style="color:${f.color}">${f.title} — ${id}</h3>
-          <p class="seat-popup-price">₹${f.price} per seat</p>
+    <div id="seat-popup-inner" style="
+      background:#0d0d18;border:1px solid ${f.color}44;border-radius:20px;
+      width:min(94vw,620px);overflow:hidden;position:relative;
+      box-shadow:0 0 80px ${f.color}20,0 24px 48px rgba(0,0,0,0.6);">
+
+      <button onclick="document.getElementById('seat-info-popup')?.remove()" style="
+        position:absolute;top:12px;right:14px;z-index:10;background:rgba(255,255,255,0.08);
+        border:1px solid rgba(255,255,255,0.14);color:#fff;width:30px;height:30px;
+        border-radius:50%;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;">x</button>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;min-height:280px;">
+
+        <div style="background:linear-gradient(135deg,#080810,#0f0f20);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;border-right:1px solid ${f.color}22;">
+          <canvas id="seat-3d-canvas" width="200" height="200" style="border-radius:10px;display:block;"></canvas>
+          <div style="margin-top:8px;font-size:10px;color:#475569;text-align:center;">Drag to rotate</div>
         </div>
-        <div class="seat-popup-badge" style="background:${f.color}20;border-color:${f.color}40;color:${f.color}">
-          Selected ✓
+
+        <div style="padding:22px 18px 18px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+            <div style="background:${f.color}22;border:1px solid ${f.color}44;border-radius:8px;padding:5px 12px;font-size:13px;font-weight:800;color:${f.color};">${id}</div>
+            <div>
+              <div style="font-size:14px;font-weight:900;color:#fff;line-height:1.2;">${f.title}</div>
+              <div style="font-size:12px;color:${f.color};font-weight:700;">Rs.${f.price} / seat</div>
+            </div>
+          </div>
+          <ul style="list-style:none;padding:0;margin:0 0 14px;display:flex;flex-direction:column;gap:7px;">
+            ${f.features.map(ft=>`<li style="font-size:11.5px;color:#94a3b8;padding-left:12px;position:relative;">
+              <span style="position:absolute;left:0;color:${f.color};">&#8250;</span>${ft}</li>`).join('')}
+          </ul>
+          <div style="background:${f.color}10;border:1px solid ${f.color}28;border-radius:10px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;margin-top:auto;">
+            <span style="font-size:12px;color:#64748b;">Seat <strong style="color:#e2e8f0;">${id}</strong></span>
+            <span style="color:#4ade80;font-size:12px;font-weight:800;">Added</span>
+          </div>
         </div>
-      </div>
-      <ul class="seat-popup-features">
-        ${f.features.map(ft => `<li>${ft}</li>`).join('')}
-      </ul>
-      <div class="seat-popup-footer">
-        <span>Seat <strong>${id}</strong> added to your selection</span>
-        <span style="color:${f.color};font-weight:700">₹${f.price}</span>
       </div>
     </div>`;
 
-  document.getElementById('screen-seats').appendChild(popup);
-  gsap.fromTo(popup, { opacity: 0, scale: 0.8, y: 30 }, { opacity: 1, scale: 1, y: 0, duration: 0.4, ease: 'back.out(1.7)' });
+  document.body.appendChild(popup);
+  gsap.fromTo('#seat-popup-inner', { opacity:0, scale:0.82, y:28 }, { opacity:1, scale:1, y:0, duration:0.4, ease:'back.out(1.7)' });
 
-  // Auto-hide after 3.5 seconds
   setTimeout(() => {
-    if (document.getElementById('seat-info-popup') === popup) {
-      gsap.to(popup, { opacity: 0, y: 20, duration: 0.3, onComplete: () => popup.remove() });
+    const canvas = document.getElementById('seat-3d-canvas');
+    if (!canvas || !window.THREE) return;
+    const W=200, H=200;
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha:true, antialias:true });
+    renderer.setSize(W,H);
+    renderer.shadowMap.enabled = true;
+    const scene  = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
+    camera.position.set(0, 2.0, 4.8);
+    camera.lookAt(0, 0.6, 0);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+    const dLight = new THREE.DirectionalLight(0xffffff, 1.1);
+    dLight.position.set(3,5,4); dLight.castShadow=true; scene.add(dLight);
+    const pLight = new THREE.PointLight(f.seatColor, 2, 10);
+    pLight.position.set(-2,3,2); scene.add(pLight);
+    const frameMat   = new THREE.MeshStandardMaterial({color:f.seatColor,   roughness:0.35,metalness:0.65});
+    const cushionMat = new THREE.MeshStandardMaterial({color:f.cushionColor, roughness:0.82,metalness:0.05});
+    const legMat     = new THREE.MeshStandardMaterial({color:0x1e293b,       roughness:0.3, metalness:0.85});
+    function box(w,h,d,mat,x,y,z,rx,ry,rz){
+      const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
+      m.position.set(x,y,z); if(rx)m.rotation.x=rx; if(ry)m.rotation.y=ry; if(rz)m.rotation.z=rz;
+      m.castShadow=true; m.receiveShadow=true; return m;
     }
-  }, 3500);
-}
+    const seatGroup = new THREE.Group();
+    seatGroup.add(box(1.7,0.1,1.7,frameMat,   0,0,0));
+    seatGroup.add(box(1.5,0.2,1.5,cushionMat, 0,0.15,0));
+    const backGroup = new THREE.Group();
+    backGroup.position.set(0,0.05,-0.8);
+    backGroup.add(box(1.7,2.0,0.14,frameMat,   0,1.0,0));
+    backGroup.add(box(1.48,1.78,0.1,cushionMat,0,1.0,0.07));
+    backGroup.add(box(1.4,0.38,0.2,cushionMat, 0,2.0,0.05));
+    seatGroup.add(backGroup);
+    [-0.9,0.9].forEach(x=>{
+      seatGroup.add(box(0.13,0.09,1.5,frameMat,x,0.32,0));
+      seatGroup.add(box(0.11,0.4,0.11,frameMat,x,0.14,-0.7));
+    });
+    [[-0.7,-0.7],[0.7,-0.7],[-0.7,0.7],[0.7,0.7]].forEach(([x,z])=>{
+      seatGroup.add(box(0.1,0.38,0.1,legMat,x,-0.19,z));
+    });
+    seatGroup.position.y = -0.3;
+    scene.add(seatGroup);
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(12,12), new THREE.MeshStandardMaterial({color:0x080810,roughness:1}));
+    floor.rotation.x=-Math.PI/2; floor.position.y=-0.5; floor.receiveShadow=true; scene.add(floor);
+    let isDrag=false, prevX=0, rotY=0.3, t=0;
+    canvas.addEventListener('mousedown', e=>{isDrag=true;prevX=e.clientX;});
+    canvas.addEventListener('touchstart',e=>{isDrag=true;prevX=e.touches[0].clientX;},{passive:true});
+    window.addEventListener('mousemove', e=>{if(!isDrag)return;rotY+=(e.clientX-prevX)*0.012;prevX=e.clientX;});
+    window.addEventListener('touchmove', e=>{if(!isDrag)return;rotY+=(e.touches[0].clientX-prevX)*0.012;prevX=e.touches[0].clientX;},{passive:true});
+    window.addEventListener('mouseup', ()=>isDrag=false);
+    window.addEventListener('touchend',()=>isDrag=false);
+    let frameId;
+    function animate(ts){
+      frameId=requestAnimationFrame(animate);
+      t+=0.014;
+      if(!isDrag) seatGroup.rotation.y+=0.009;
+      else        seatGroup.rotation.y=rotY;
+      const rTarget = (Math.sin(t*0.45)>0) ? -0.36 : 0;
+      backGroup.rotation.x += (rTarget - backGroup.rotation.x)*0.045;
+      seatGroup.position.y = -0.3 + Math.sin(t)*0.038;
+      renderer.render(scene,camera);
+    }
+    animate(0);
+    const obs=new MutationObserver(()=>{
+      if(!document.getElementById('seat-info-popup')){cancelAnimationFrame(frameId);renderer.dispose();obs.disconnect();}
+    });
+    obs.observe(document.body,{childList:true,subtree:true});
+  }, 60);
 
+  popup.addEventListener('click', e=>{ if(e.target===popup) popup.remove(); });
+}
 function updateSeatUI() {
   const count = APP.selectedSeats.length;
   document.getElementById('seat-count-display').textContent = `${count} Seat${count !== 1 ? 's' : ''}`;
