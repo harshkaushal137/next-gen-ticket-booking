@@ -23,7 +23,7 @@ const AI_SEARCH_CONFIG = {
   // Use local backend during development, and relative path when served from the same host.
   API_BASE: (() => {
     if (window.location.protocol === 'file:') {
-      return 'http://localhost:3001/api/movies';
+      return 'https://web-production-e76af.up.railway.app/api/movies';
     }
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
       return 'http://localhost:3001/api/movies';
