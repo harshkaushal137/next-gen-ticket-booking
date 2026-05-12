@@ -168,6 +168,214 @@ function initIntroCanvas() {
   canvas._stop = () => { running = false; };
 }
 
+// ─── 3D CINEMA REEL ANIMATION (Three.js) ────────────────────────────────────
+// Runs on #reel-3d-canvas — completely separate from existing intro-canvas
+// No existing code is modified — purely additive
+function init3DCinemaReel() {
+  if (!window.THREE) return;
+  const canvas = document.getElementById('reel-3d-canvas');
+  if (!canvas) return;
+
+  const W = window.innerWidth, H = window.innerHeight;
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  renderer.setSize(W, H);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setClearColor(0x000000, 0);
+
+  const scene  = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(50, W / H, 0.1, 100);
+  camera.position.set(0, 0, 7);
+
+  // ── Lighting ──────────────────────────────────────────────
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+  scene.add(ambientLight);
+
+  const goldLight = new THREE.PointLight(0xfacc15, 3, 15);
+  goldLight.position.set(3, 3, 4);
+  scene.add(goldLight);
+
+  const purpleLight = new THREE.PointLight(0x7c3aed, 2, 12);
+  purpleLight.position.set(-3, -2, 3);
+  scene.add(purpleLight);
+
+  const rimLight = new THREE.DirectionalLight(0xfacc15, 0.8);
+  rimLight.position.set(0, 5, -5);
+  scene.add(rimLight);
+
+  // ── Materials ─────────────────────────────────────────────
+  const reelMat   = new THREE.MeshStandardMaterial({ color: 0x1a1a2e, roughness: 0.3, metalness: 0.9 });
+  const rimMat    = new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.2, metalness: 1.0, emissive: 0xfacc15, emissiveIntensity: 0.15 });
+  const spokeMat  = new THREE.MeshStandardMaterial({ color: 0xd4a800, roughness: 0.4, metalness: 0.8 });
+  const holeMat   = new THREE.MeshStandardMaterial({ color: 0x000000, roughness: 1.0, metalness: 0.0 });
+  const filmMat   = new THREE.MeshStandardMaterial({ color: 0x0d0d14, roughness: 0.6, metalness: 0.2 });
+  const frameMat  = new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.3, metalness: 0.9, emissive: 0xfacc15, emissiveIntensity: 0.3 });
+
+  // ── Helper ────────────────────────────────────────────────
+  function cyl(rTop, rBot, h, segs, mat) {
+    return new THREE.Mesh(new THREE.CylinderGeometry(rTop, rBot, h, segs), mat);
+  }
+
+  // ── Reel Group ────────────────────────────────────────────
+  const reelGroup = new THREE.Group();
+
+  // Main disc body
+  const disc = cyl(1.6, 1.6, 0.22, 64, reelMat);
+  reelGroup.add(disc);
+
+  // Outer gold rim
+  const outerRim = new THREE.Mesh(
+    new THREE.TorusGeometry(1.6, 0.06, 12, 80),
+    rimMat
+  );
+  reelGroup.add(outerRim);
+
+  // Inner hub
+  const hub = cyl(0.35, 0.35, 0.28, 32, rimMat);
+  reelGroup.add(hub);
+
+  // Center hole
+  const centerHole = cyl(0.18, 0.18, 0.32, 24, holeMat);
+  reelGroup.add(centerHole);
+
+  // Spokes (6)
+  for (let i = 0; i < 6; i++) {
+    const angle = (i / 6) * Math.PI * 2;
+    const spoke = cyl(0.055, 0.055, 1.18, 8, spokeMat);
+    spoke.rotation.z = Math.PI / 2;
+    spoke.position.set(
+      Math.cos(angle) * 0.95,
+      Math.sin(angle) * 0.95,
+      0
+    );
+    spoke.rotation.z = angle + Math.PI / 2;
+    reelGroup.add(spoke);
+  }
+
+  // Sprocket holes around rim (16 holes)
+  for (let i = 0; i < 16; i++) {
+    const angle = (i / 16) * Math.PI * 2;
+    const hole = cyl(0.08, 0.08, 0.26, 12, holeMat);
+    hole.position.set(
+      Math.cos(angle) * 1.32,
+      Math.sin(angle) * 1.32,
+      0
+    );
+    reelGroup.add(hole);
+  }
+
+  // Film strip wrapped around outer edge (decorative frames)
+  for (let i = 0; i < 12; i++) {
+    const angle = (i / 12) * Math.PI * 2;
+    const frame = new THREE.Mesh(
+      new THREE.BoxGeometry(0.18, 0.13, 0.06),
+      frameMat
+    );
+    frame.position.set(
+      Math.cos(angle) * 1.52,
+      Math.sin(angle) * 1.52,
+      0.14
+    );
+    frame.rotation.z = angle;
+    reelGroup.add(frame);
+
+    // Same on back
+    const frameBack = frame.clone();
+    frameBack.position.z = -0.14;
+    reelGroup.add(frameBack);
+  }
+
+  // Position reel — slightly right and bottom
+  reelGroup.position.set(2.2, -0.8, 0);
+  reelGroup.rotation.z = 0.25;
+  scene.add(reelGroup);
+
+  // ── Second smaller reel (background) ─────────────────────
+  const reel2 = reelGroup.clone();
+  reel2.scale.setScalar(0.52);
+  reel2.position.set(-2.8, 1.2, -2);
+  reel2.rotation.z = -0.4;
+  scene.add(reel2);
+
+  // ── Film strip connecting the two reels ──────────────────
+  const stripGroup = new THREE.Group();
+  const stripPoints = [];
+  for (let i = 0; i <= 30; i++) {
+    const t = i / 30;
+    const x = -2.8 + t * (2.2 - (-2.8));
+    const y = -0.8 + Math.sin(t * Math.PI * 1.5) * 0.8 + t * (1.2 - (-0.8));
+    stripPoints.push(new THREE.Vector3(x, y, -0.5));
+  }
+  const stripCurve  = new THREE.CatmullRomCurve3(stripPoints);
+  const stripGeom   = new THREE.TubeGeometry(stripCurve, 40, 0.04, 6, false);
+  const strip       = new THREE.Mesh(stripGeom, filmMat);
+  scene.add(strip);
+
+  // Film frame markers on strip
+  for (let i = 0; i < 12; i++) {
+    const t = (i + 0.5) / 12;
+    const pt = stripCurve.getPoint(t);
+    const marker = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.09, 0.03), frameMat);
+    marker.position.copy(pt);
+    scene.add(marker);
+  }
+
+  // ── Floating sparkles ─────────────────────────────────────
+  const sparkGeo = new THREE.BufferGeometry();
+  const sparkCount = 80;
+  const sparkPos = new Float32Array(sparkCount * 3);
+  for (let i = 0; i < sparkCount; i++) {
+    sparkPos[i*3]   = (Math.random() - 0.5) * 12;
+    sparkPos[i*3+1] = (Math.random() - 0.5) * 8;
+    sparkPos[i*3+2] = (Math.random() - 0.5) * 5 - 2;
+  }
+  sparkGeo.setAttribute('position', new THREE.BufferAttribute(sparkPos, 3));
+  const sparkMat  = new THREE.PointsMaterial({ color: 0xfacc15, size: 0.06, transparent: true, opacity: 0.7 });
+  const sparkles  = new THREE.Points(sparkGeo, sparkMat);
+  scene.add(sparkles);
+
+  // ── Resize handler ────────────────────────────────────────
+  window.addEventListener('resize', () => {
+    const nW = window.innerWidth, nH = window.innerHeight;
+    camera.aspect = nW / nH;
+    camera.updateProjectionMatrix();
+    renderer.setSize(nW, nH);
+  });
+
+  // ── Animation loop ────────────────────────────────────────
+  let reelFrame;
+  const clock = new THREE.Clock();
+  function animateReel() {
+    reelFrame = requestAnimationFrame(animateReel);
+    const t = clock.getElapsedTime();
+
+    // Main reel rotates clockwise (film reeling in)
+    reelGroup.rotation.z -= 0.012;
+
+    // Secondary reel rotates opposite (supply reel)
+    reel2.rotation.z += 0.018;
+
+    // Subtle floating bob
+    reelGroup.position.y = -0.8 + Math.sin(t * 0.6) * 0.08;
+    reel2.position.y     =  1.2 + Math.sin(t * 0.8 + 1) * 0.06;
+
+    // Gold light pulse (projector flicker effect)
+    goldLight.intensity = 2.8 + Math.sin(t * 4) * 0.5;
+
+    // Sparkles twinkle
+    sparkMat.opacity = 0.5 + Math.sin(t * 2.5) * 0.3;
+    sparkles.rotation.z += 0.001;
+
+    renderer.render(scene, camera);
+  }
+  animateReel();
+
+  // Stop when leaving intro screen
+  canvas._stop3D = () => {
+    cancelAnimationFrame(reelFrame);
+    renderer.dispose();
+  };
+}
+
 /** Entrance animations: handshake first, then typewriter brand name, then rest */
 function initIntroAnimations() {
   // Ensure progress and button are always visible (GSAP-independent fallback)
@@ -1827,6 +2035,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 2. Particle canvas (uses window.innerWidth — works even if screen was hidden)
   initIntroCanvas();
+  init3DCinemaReel(); // 3D cinema reel — additive, no existing code changed
 
   // 3. Entrance animations for the intro screen elements
   initIntroAnimations();
