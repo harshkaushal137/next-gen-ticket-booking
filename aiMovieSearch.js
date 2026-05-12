@@ -26,7 +26,7 @@ const AI_SEARCH_CONFIG = {
       return 'https://web-production-e76af.up.railway.app/api/movies';
     }
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      return 'http://localhost:3001/api/movies';
+      return 'https://web-production-e76af.up.railway.app/api/movies';
     }
     return 'https://web-production-e76af.up.railway.app/api/movies';
   })(),
